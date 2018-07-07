@@ -9,8 +9,9 @@
       @mouseout.self="$emit('mouseoutOnBar')"
     />
     <div
+      ref="item"
       class="item"
-      :style="{left: `calc(${percent}% - 0.8rem)`}"
+      :style="{left: itemLeft}"
     />
   </div>
 </template>
@@ -25,14 +26,23 @@ export default {
   computed: {
     percent() {
       return ((this.value - this.min) / (this.max - this.min)) * 100
+    },
+    itemLeft() {
+      if (!this.$refs.bar || !this.$refs.item) return `${this.percent}%`
+      const barBox = this.$refs.bar.getBoundingClientRect()
+      const itemBox = this.$refs.item.getBoundingClientRect()
+      return `${(this.percent * (barBox.width - itemBox.width)) /
+        barBox.width}%`
     }
   },
   methods: {
     createValueFromPosition(e) {
-      const box = this.$refs.bar.getBoundingClientRect()
-      const x = e.pageX - box.left + window.pageXOffset
-      const y = e.pageY - box.top + window.pageYOffset
-      const value = (x / box.width) * this.max
+      const barBox = this.$refs.bar.getBoundingClientRect()
+      const itemBox = this.$refs.item.getBoundingClientRect()
+      const x = e.pageX - barBox.left + window.pageXOffset
+      const y = e.pageY - barBox.top + window.pageYOffset
+      const value =
+        ((x - itemBox.width / 2) / (barBox.width - itemBox.width)) * this.max
       return {
         value: Math.max(Math.min(value, this.max), this.min),
         x,
@@ -65,6 +75,8 @@ export default {
 </script>
 
 <style lang="postcss" scoped>
+$item_size: 1.6rem;
+$item_size_half: 0.8rem;
 .video_slider {
   display: flex;
   align-items: center;
@@ -73,14 +85,14 @@ export default {
   user-select: none;
   .bar {
     width: 100%;
-    height: 1.6rem;
+    height: $item_size;
     border: 0.1rem solid black;
-    border-radius: 0.8rem;
+    border-radius: $item_size_half;
     cursor: pointer;
   }
   .item {
-    width: 2rem;
-    height: 2rem;
+    width: $item_size;
+    height: $item_size;
     position: absolute;
     background-color: rgba(30, 30, 30, 1);
     border-radius: 50%;
