@@ -29,6 +29,7 @@
         :mute="isMute"
         :currentTime="currentTime"
         :duration="duration"
+        :volume="volume"
         @play="play"
         @pause="pause"
         @mute="mute"
@@ -37,6 +38,7 @@
         @startSeek="startSeek"
         @endSeek="endSeek"
         @mousemoveOnSeekBar="mousemoveOnSeekBar"
+        @changeVolume="changeVolume"
       >
       <canvas
         slot="seekSnap"
@@ -58,6 +60,7 @@ export default {
     isMute: false,
     currentTime: 0,
     duration: 1,
+    volume: 0,
     snapping: false,
     seeking: false
   }),
@@ -72,6 +75,7 @@ export default {
   methods: {
     play() {
       this.isPlay = true
+      if (this.atLast) this.currentTime = 0
       this.startFrame()
       this.$refs.video.play()
     },
@@ -87,9 +91,9 @@ export default {
       this.isMute = false
       this.$refs.video.muted = false
     },
-    seek({ value }) {
-      this.currentTime = value
-      this.$refs.video.currentTime = value
+    seek(value) {
+      this.currentTime = Math.max(Math.min(value, this.duration), 0)
+      this.$refs.video.currentTime = this.currentTime
     },
     startSeek() {
       this.seeking = true
@@ -110,6 +114,7 @@ export default {
       const rate = 160 / this.$refs.video.videoWidth
       this.$refs.canvas.width = this.$refs.video.videoWidth * rate
       this.$refs.canvas.height = this.$refs.video.videoHeight * rate
+      this.volume = this.$refs.video.volume
     },
     startFrame() {
       const me = () => {
@@ -142,6 +147,10 @@ export default {
           )
         this.snapping = false
       }, 10)
+    },
+    changeVolume(volume) {
+      this.volume = volume
+      this.$refs.video.volume = this.volume
     }
   }
 }
@@ -154,6 +163,7 @@ export default {
   position: relative;
   font-size: 0;
   .main_video_box {
+    position: relative;
     .main_video {
       max-width: 100%;
       max-height: 100%;
@@ -173,6 +183,7 @@ export default {
         max-width: 6.4rem;
         height: auto;
         margin: auto;
+        transition: all 0.1s;
       }
     }
     &:hover .video_icon img {
@@ -180,6 +191,11 @@ export default {
       max-width: 7rem;
       opacity: 0.9;
     }
+  }
+  .controll_box {
+    // position: absolute;
+    // bottom: 0;
+    width: 100%;
   }
 }
 </style>

@@ -56,7 +56,7 @@ export default {
       this.drag(e)
     },
     drag(e) {
-      this.$emit('input', this.createValueFromPosition(e))
+      this.$emit('input', this.createValueFromPosition(e).value)
     },
     endDrag(e) {
       window.removeEventListener('mousemove', this.drag)
@@ -75,30 +75,43 @@ export default {
 </script>
 
 <style lang="postcss" scoped>
+$bar_size: 0.4rem;
+$bar_size_half: 0.2rem;
+$bar_hover_size: 1rem;
+$bar_hover_size_half: 0.5rem;
 $item_size: 1.6rem;
 $item_size_half: 0.8rem;
 .video_slider {
   display: flex;
   align-items: center;
   width: 100%;
+  height: $item_size;
   position: relative;
   user-select: none;
+  cursor: pointer;
   .bar {
+    transition: all 0.2s;
     width: 100%;
-    height: $item_size;
-    border: 0.1rem solid black;
-    border-radius: $item_size_half;
-    cursor: pointer;
+    height: $bar_size;
+    background-color: white;
+    border-radius: $bar_size_half;
   }
   .item {
     width: $item_size;
     height: $item_size;
     position: absolute;
-    background-color: rgba(30, 30, 30, 1);
+    background-color: rgb(80, 80, 80);
+    border: 0.1rem solid white;
     border-radius: 50%;
     cursor: pointer;
     &:hover {
-      background-color: rgba(80, 80, 80, 1);
+      background-color: rgb(80, 80, 80);
+    }
+  }
+  &:hover {
+    .bar {
+      height: $bar_hover_size;
+      border-radius: $bar_size_half;
     }
   }
 }
