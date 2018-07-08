@@ -1,17 +1,19 @@
 <template>
   <div id="app">
-    <VideFrame src="https://player.vimeo.com/external/272460160.hd.mp4?s=ef7cfe6db7b4db13cc8bf33dae6978e30359dfee&profile_id=175&oauth2_token_id=57447761&download=1"/>
+    <VideFrame :src="video"/>
   </div>
 </template>
 
 <script>
-import VideFrame from './components/VideFrame'
+import VideFrame from '@/components/VideFrame'
+import video from '@/assets/sample2.mp4'
 
 export default {
   name: 'App',
   components: {
     VideFrame
-  }
+  },
+  data: () => ({ video })
 }
 </script>
 
