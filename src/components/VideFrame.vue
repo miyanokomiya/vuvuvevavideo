@@ -9,8 +9,9 @@
         @timeupdate="timeupdate"
         @loadedmetadata="loadedmetadata"
         @play="isPlay = true"
+        @progress="progress"
       >
-        <source src="~@/assets/sample2.mp4" />
+        <source :src="src" />
       </video>
       <div class="video_icon">
         <img v-if="!isPlay && !seeking" src="~@/assets/icon_play.svg"/>
@@ -21,7 +22,7 @@
       ref="videoHidden"
       preload="auto"
     >
-      <source src="~@/assets/sample2.mp4" />
+      <source :src="src" />
     </video>
     <div class="controll_box">
       <VideoControll
@@ -30,6 +31,7 @@
         :currentTime="currentTime"
         :duration="duration"
         :volume="volume"
+        :buffered="buffered"
         @play="play"
         @pause="pause"
         @mute="mute"
@@ -62,8 +64,12 @@ export default {
     duration: 1,
     volume: 0,
     snapping: false,
-    seeking: false
+    seeking: false,
+    buffered: []
   }),
+  props: {
+    src: { type: String, required: true }
+  },
   computed: {
     atFirst() {
       return this.currentTime === 0
@@ -73,6 +79,15 @@ export default {
     }
   },
   methods: {
+    progress() {
+      this.buffered = []
+      for (let i = 0; i < this.$refs.video.buffered.length; i++) {
+        this.buffered.push({
+          s: this.$refs.video.buffered.start(i),
+          e: this.$refs.video.buffered.end(i)
+        })
+      }
+    },
     play() {
       this.isPlay = true
       if (this.atLast) this.currentTime = 0
@@ -115,6 +130,7 @@ export default {
       this.$refs.canvas.width = this.$refs.video.videoWidth * rate
       this.$refs.canvas.height = this.$refs.video.videoHeight * rate
       this.volume = this.$refs.video.volume
+      this.progress()
     },
     startFrame() {
       const me = () => {
@@ -124,6 +140,7 @@ export default {
           return
         }
         this.currentTime = this.$refs.video.currentTime
+        this.progress()
         requestAnimationFrame(me)
       }
       requestAnimationFrame(me)

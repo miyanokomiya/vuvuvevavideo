@@ -4,6 +4,7 @@
       <VideoSlider
         :value="currentTime"
         :max="duration"
+        :buffered="buffered"
         @input="val => $emit('seek', val)"
         @startDrag="$emit('startSeek')"
         @endDrag="$emit('endSeek')"
@@ -63,7 +64,8 @@ export default {
     mute: { type: Boolean, default: false },
     currentTime: { type: Number, default: 0 },
     duration: { type: Number, default: 1 },
-    volume: { type: Number, default: 0 }
+    volume: { type: Number, default: 0 },
+    buffered: { type: Array, default: () => [] }
   },
   computed: {
     spanTimeLabel() {
@@ -96,6 +98,7 @@ export default {
 <style lang="postcss" scoped>
 .vide_controll {
   background-color: rgb(75, 75, 75);
+  padding: 0 0.4rem;
 }
 .slider_box {
   position: relative;
@@ -106,6 +109,7 @@ export default {
     border-radius: 1rem;
     overflow: hidden;
     font-size: 0;
+    transition: all 0.1s;
     p {
       margin: 0;
       text-align: center;
@@ -119,7 +123,7 @@ export default {
   display: flex;
   align-items: center;
   button {
-    background-color: white;
+    background-color: transparent;
     border-bottom: inset;
     border: none;
     padding: 0;
@@ -145,7 +149,8 @@ export default {
   .next {
     width: 3rem;
     height: 3rem;
-    background-color: white;
+    background-color: transparent;
+    background-size: cover;
     border: none;
     img {
       width: auto;
@@ -153,6 +158,7 @@ export default {
       vertical-align: middle;
     }
     span {
+      padding: 0.1rem;
       border-radius: 50%;
       background-color: rgb(75, 75, 75);
       color: white;

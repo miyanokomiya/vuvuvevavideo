@@ -7,7 +7,14 @@
       class="bar"
       @mousemove.self="mousemoveOnBar"
       @mouseout.self="$emit('mouseoutOnBar')"
-    />
+    >
+      <div
+        class="buffered"
+        v-for="(interval, key) in bufferedIntervals"
+        :key="key"
+        :style="interval"
+      />
+    </div>
     <div
       ref="item"
       class="item"
@@ -21,24 +28,45 @@ export default {
   props: {
     value: { type: Number, default: 0 },
     max: { type: Number, default: 100 },
-    min: { type: Number, default: 0 }
+    min: { type: Number, default: 0 },
+    buffered: { type: Array, default: () => [] }
   },
   computed: {
     percent() {
-      return ((this.value - this.min) / (this.max - this.min)) * 100
+      return this.getRate(this.value) * 100
     },
     itemLeft() {
-      if (!this.$refs.bar || !this.$refs.item) return `${this.percent}%`
-      const barBox = this.$refs.bar.getBoundingClientRect()
-      const itemBox = this.$refs.item.getBoundingClientRect()
+      const barBox = this.createBarBox()
+      const itemBox = this.createItemBox()
       return `${(this.percent * (barBox.width - itemBox.width)) /
         barBox.width}%`
+    },
+    bufferedIntervals() {
+      const barBox = this.createBarBox()
+      return this.buffered.reduce((p, c) => {
+        p[c.s] = {
+          left: `${this.getRate(c.s) * barBox.width}px`,
+          width: `${((c.e - c.s) / this.max) * barBox.width}px`
+        }
+        return p
+      }, {})
     }
   },
   methods: {
+    getRate(value) {
+      return (value - this.min) / (this.max - this.min)
+    },
+    createBarBox() {
+      if (!this.$refs.bar) return { left: 0, top: 0, width: 1, height: 1 }
+      return this.$refs.bar.getBoundingClientRect()
+    },
+    createItemBox() {
+      if (!this.$refs.item) return { left: 0, top: 0, width: 1, height: 1 }
+      return this.$refs.item.getBoundingClientRect()
+    },
     createValueFromPosition(e) {
-      const barBox = this.$refs.bar.getBoundingClientRect()
-      const itemBox = this.$refs.item.getBoundingClientRect()
+      const barBox = this.createBarBox()
+      const itemBox = this.createItemBox()
       const x = e.pageX - barBox.left + window.pageXOffset
       const y = e.pageY - barBox.top + window.pageYOffset
       const value =
@@ -95,6 +123,15 @@ $item_size_half: 0.8rem;
     height: $bar_size;
     background-color: white;
     border-radius: $bar_size_half;
+    position: relative;
+    overflow: hidden;
+  }
+  .buffered {
+    height: 100%;
+    position: absolute;
+    background-color: #aaa;
+    pointer-events: none;
+    transition: all 0.2s;
   }
   .item {
     width: $item_size;
@@ -104,6 +141,7 @@ $item_size_half: 0.8rem;
     border: 0.1rem solid white;
     border-radius: 50%;
     cursor: pointer;
+    transition: all 0.1s;
     &:hover {
       background-color: rgb(80, 80, 80);
     }

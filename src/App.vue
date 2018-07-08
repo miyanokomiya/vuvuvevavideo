@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <VideFrame/>
+    <VideFrame src="https://player.vimeo.com/external/272460160.hd.mp4?s=ef7cfe6db7b4db13cc8bf33dae6978e30359dfee&profile_id=175&oauth2_token_id=57447761&download=1"/>
   </div>
 </template>
 
